@@ -83,9 +83,21 @@ if st.button("Find Similar Cars"):
     if results:
         for car in results:
             car_data = car["_source"]
-            st.write(f"🚗 **{car_data['Make']} {car_data['Model']}** - ${car_data['Price']}")
-            st.write(f"📏 Mileage: {car_data['Mileage']} km | 🔥 Performance: {car_data['Performance']} HP")
-            st.write("💡 Category:", car_data["Category"])
+            
+            real_category = car_data["Category"]
+            real_gearbox = car_data["Gearbox"]
+            real_fuel_type = car_data["FuelTyp"]
+            real_first_reg = car_data["FirstReg"]
+            real_price = car_data["Price"]
+            real_mileage = car_data["Mileage"]
+            real_performance = car_data["Performance"]
+        
+            st.write(f"🚗 **{car_data['Make']} {car_data['Model']}** - ${real_price}")
+            st.write(f"📏 Mileage: {real_mileage} km | 🔥 Performance: {real_performance} HP")
+            st.write(f"💡 Category: {real_category} | Gearbox: {real_gearbox} | Fuel Type: {real_fuel_type}")
+            st.write(f"📅 First Registration: {real_first_reg}")
             st.write("---")
+
+    
     else:
         st.write("❌ No similar cars found.")
