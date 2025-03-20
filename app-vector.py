@@ -55,7 +55,24 @@ scaler.fit(np.array([[2000, 1000, 0, 50], [2025, 100000, 300000, 1000]]))  # Adj
 
 # Reverse functions to decode the values
 def reverse_scaling(scaled_values):
-    return scaler.inverse_transform([scaled_values])[0]
+    try:
+        # Debug: Print input before transformation
+        print(f"Scaling input: {scaled_values} (Type: {type(scaled_values)})")
+
+        # Ensure the input is a NumPy array and properly reshaped
+        scaled_values = np.array(scaled_values, dtype=float).reshape(1, -1)
+
+        # Apply inverse scaling
+        original_values = scaler.inverse_transform(scaled_values)[0]
+
+        # Debug: Print output after transformation
+        print(f"Reversed scaling: {original_values}")
+
+        return original_values
+    except Exception as e:
+        print(f"Error in reverse_scaling: {e}")
+        return [None] * len(scaled_values)  # Return None for each feature if there's an error
+
 
 def reverse_encoding(encoded_value, feature):
     try:
