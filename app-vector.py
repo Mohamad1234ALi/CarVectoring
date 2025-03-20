@@ -47,12 +47,8 @@ label_encoders = {
 
 
 # Initialize StandardScaler
-#scaler_url = "https://car-recommendation-raed.s3.us-east-1.amazonaws.com/modelvectoring/scaler.pkl"
-#scaler = load_scaler(scaler_url)
-# Load MinMaxScaler (these must match your stored embeddings)
-scaler = MinMaxScaler(feature_range=(0, 1))
-scaler.fit(np.array([[2000, 1000, 0, 50], [2025, 100000, 300000, 1000]]))  # Adjust based on your dataset
-
+scaler_url = "https://car-recommendation-raed.s3.us-east-1.amazonaws.com/modelvectoring/scaler.pkl"
+scaler = load_scaler(scaler_url)
     
 # Function to convert user input into vector
 def preprocess_input(category, gearbox, fuel_type, first_reg, price, mileage, performance):
@@ -60,9 +56,9 @@ def preprocess_input(category, gearbox, fuel_type, first_reg, price, mileage, pe
     gearbox_encoded = label_encoders["Gearbox"].transform([gearbox])[0]
     fuel_type_encoded = label_encoders["FuelType"].transform([fuel_type])[0]
 
-    numerical_values = np.array([[first_reg, price, mileage, performance]])
-    numerical_scaled = scaler.transform(numerical_values)[0] 
-    # numerical_scaled = scaler.transform([[first_reg, price, mileage, performance]])[0]
+    # numerical_values = np.array([[first_reg, price, mileage, performance]])
+    # numerical_scaled = scaler.transform(numerical_values)[0] 
+    numerical_scaled = scaler.transform([[first_reg, price, mileage, performance]])[0]  # Flatten the result
 
     return np.concatenate(([category_encoded, gearbox_encoded, fuel_type_encoded], numerical_scaled))
 
