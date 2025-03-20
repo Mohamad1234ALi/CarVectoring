@@ -57,8 +57,18 @@ scaler.fit(np.array([[2000, 1000, 0, 50], [2025, 100000, 300000, 1000]]))  # Adj
 def reverse_scaling(scaled_values):
     return scaler.inverse_transform([scaled_values])[0]
 
-def reverse_encoding(encoded_values, feature):
-    return label_encoders[feature].inverse_transform([encoded_values])[0]
+def reverse_encoding(encoded_value, feature):
+    try:
+        # Debug: Check the type and value before transformation
+        print(f"Decoding {feature}: {encoded_value} (Type: {type(encoded_value)})")
+        
+        # Convert to integer if it's not
+        encoded_value = int(encoded_value) if not isinstance(encoded_value, int) else encoded_value
+
+        return label_encoders[feature].inverse_transform([encoded_value])[0]
+    except Exception as e:
+        print(f"Error decoding {feature}: {e}")
+        return "Unknown"
     
 # Function to convert user input into vector
 def preprocess_input(category, gearbox, fuel_type, first_reg, price, mileage, performance):
