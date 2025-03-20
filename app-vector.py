@@ -3,12 +3,27 @@ import numpy as np
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder, MinMaxScaler
 from opensearchpy import OpenSearch
-
+from io import StringIO
+import requests
+import joblib
+from io import BytesIO
 # OpenSearch Configuration
 OPENSEARCH_HOST = "https://search-moesystemcar-dnrec2g6qpqy5s5qtlujs7mqly.us-east-1.es.amazonaws.com"
 INDEX_NAME = "cars_index_new"
 USERNAME = "moeuser"
 PASSWORD = "Mohamad@123"
+
+@st.cache_resource
+def load_scaler(url: str):
+    try:
+        response = requests.get(url)
+        response.raise_for_status()  # Raise an exception for HTTP errors
+        scaler = joblib.load(BytesIO(response.content))
+        return scaler
+    except Exception as e:
+        st.error(f"Failed to load scaler: {e}")
+        return None
+
 
 # Connect to OpenSearch
 client = OpenSearch(
@@ -30,9 +45,9 @@ label_encoders = {
     "FuelType": LabelEncoder().fit(["Petrol", "Diesel", "Electric", "Hybrid"]),
 }
 
-# Load MinMaxScaler (these must match your stored embeddings)
-scaler = MinMaxScaler(feature_range=(0, 1))
-scaler.fit(np.array([[2000, 1000, 0, 50], [2025, 100000, 300000, 1000]]))  # Adjust based on your dataset
+
+scaler_url = "https://car-recommendation-raed.s3.us-east-1.amazonaws.com/modelvectoring/scaler.pkl"
+scaler = load_scaler(scaler_url)
 
 # Function to convert user input into vector
 def preprocess_input(category, gearbox, fuel_type, first_reg, price, mileage, performance):
