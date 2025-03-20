@@ -20,14 +20,14 @@ client = OpenSearch(
 )
 
 # Define categorical and numerical features
-CATEGORICAL_FEATURES = ["Category", "Gearbox", "FuelTyp"]
+CATEGORICAL_FEATURES = ["Category", "Gearbox", "FuelType"]
 NUMERICAL_FEATURES = ["FirstReg", "Price", "Mileage", "Performance"]
 
 # Load label encoders (these must match what was used in your index)
 label_encoders = {
     "Category": LabelEncoder().fit(["OffRoad", "Van", "Limousine", "Estate Car", "Small car", "Sport Car"]),
     "Gearbox": LabelEncoder().fit(["Manual", "Automatic"]),
-    "FuelTyp": LabelEncoder().fit(["Petrol", "Diesel", "Electric", "Hybrid"]),
+    "FuelType": LabelEncoder().fit(["Petrol", "Diesel", "Electric", "Hybrid"]),
 }
 
 # Load MinMaxScaler (these must match your stored embeddings)
@@ -38,7 +38,7 @@ scaler.fit(np.array([[2000, 1000, 0, 50], [2025, 100000, 300000, 1000]]))  # Adj
 def preprocess_input(category, gearbox, fuel_type, first_reg, price, mileage, performance):
     category_encoded = label_encoders["Category"].transform([category])[0]
     gearbox_encoded = label_encoders["Gearbox"].transform([gearbox])[0]
-    fuel_type_encoded = label_encoders["FuelTyp"].transform([fuel_type])[0]
+    fuel_type_encoded = label_encoders["FuelType"].transform([fuel_type])[0]
 
     numerical_values = np.array([[first_reg, price, mileage, performance]])
     numerical_scaled = scaler.transform(numerical_values)[0]
@@ -71,7 +71,7 @@ category = st.selectbox("Category", label_encoders["Category"].classes_)
 first_reg = st.slider("First Registration Year", 2000, 2025, 2015)
 gearbox = st.selectbox("Gearbox", label_encoders["Gearbox"].classes_)
 price = st.number_input("Price ($)", min_value=1000, max_value=100000, value=20000)
-fuel_type = st.selectbox("Fuel Type", label_encoders["FuelTyp"].classes_)
+fuel_type = st.selectbox("Fuel Type", label_encoders["FuelType"].classes_)
 mileage = st.number_input("Mileage (km)", min_value=0, max_value=300000, value=50000)
 performance = st.number_input("Performance (HP)", min_value=50, max_value=1000, value=150)
 
@@ -86,7 +86,7 @@ if st.button("Find Similar Cars"):
             
             real_category = car_data["Category"]
             real_gearbox = car_data["Gearbox"]
-            real_fuel_type = car_data["FuelTyp"]
+            real_fuel_type = car_data["FuelType"]
             real_first_reg = car_data["FirstReg"]
             real_price = car_data["Price"]
             real_mileage = car_data["Mileage"]
