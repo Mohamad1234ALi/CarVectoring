@@ -66,8 +66,8 @@ def preprocess_input(category, gearbox, fuel_type, first_reg, price, mileage, pe
     gearbox_encoded = label_encoders["Gearbox"].transform([gearbox])[0]
     fuel_type_encoded = label_encoders["FuelType"].transform([fuel_type])[0]
 
-     numerical_values = np.array([[first_reg, price, mileage, performance]])
-     numerical_scaled = scaler.transform(numerical_values)[0] 
+    numerical_values = np.array([[first_reg, price, mileage, performance]])
+    numerical_scaled = scaler.transform(numerical_values)[0] 
     # numerical_scaled = scaler.transform([[first_reg, price, mileage, performance]])[0]
 
     return np.concatenate(([category_encoded, gearbox_encoded, fuel_type_encoded], numerical_scaled))
