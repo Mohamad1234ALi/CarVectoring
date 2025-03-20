@@ -47,18 +47,28 @@ label_encoders = {
 
 
 # Initialize StandardScaler
-scaler_url = "https://car-recommendation-raed.s3.us-east-1.amazonaws.com/modelvectoring/scaler.pkl"
-scaler = load_scaler(scaler_url)
+#scaler_url = "https://car-recommendation-raed.s3.us-east-1.amazonaws.com/modelvectoring/scaler.pkl"
+#scaler = load_scaler(scaler_url)
+# Load MinMaxScaler (these must match your stored embeddings)
+scaler = MinMaxScaler(feature_range=(0, 1))
+scaler.fit(np.array([[2000, 1000, 0, 50], [2025, 100000, 300000, 1000]]))  # Adjust based on your dataset
 
+# Reverse functions to decode the values
+def reverse_scaling(scaled_values):
+    return scaler.inverse_transform([scaled_values])[0]
+
+def reverse_encoding(encoded_values, feature):
+    return label_encoders[feature].inverse_transform([encoded_values])[0]
+    
 # Function to convert user input into vector
 def preprocess_input(category, gearbox, fuel_type, first_reg, price, mileage, performance):
     category_encoded = label_encoders["Category"].transform([category])[0]
     gearbox_encoded = label_encoders["Gearbox"].transform([gearbox])[0]
     fuel_type_encoded = label_encoders["FuelType"].transform([fuel_type])[0]
 
-    # numerical_values = np.array([[first_reg, price, mileage, performance]])
-    # numerical_scaled = scaler.transform(numerical_values)[0] 
-    numerical_scaled = scaler.transform([[first_reg, price, mileage, performance]])[0]
+     numerical_values = np.array([[first_reg, price, mileage, performance]])
+     numerical_scaled = scaler.transform(numerical_values)[0] 
+    # numerical_scaled = scaler.transform([[first_reg, price, mileage, performance]])[0]
 
     return np.concatenate(([category_encoded, gearbox_encoded, fuel_type_encoded], numerical_scaled))
 
@@ -100,21 +110,18 @@ if st.button("Find Similar Cars"):
     if results:
         for car in results:
             car_data = car["_source"]
-            
-            real_category = car_data["Category"]
-            real_gearbox = car_data["Gearbox"]
-            real_fuel_type = car_data["FuelType"]
+            # Reverse scaling and encoding
+            real_category = reverse_encoding(car_data["Category"], "Category")
+            real_gearbox = reverse_encoding(car_data["Gearbox"], "Gearbox")
+            real_fuel_type = reverse_encoding(car_data["FuelType"], "FuelType")
             real_first_reg = car_data["FirstReg"]
             real_price = car_data["Price"]
-            real_mileage = car_data["Mileage"]
-            real_performance = car_data["Performance"]
-        
+            real_mileage, real_performance = reverse_scaling([car_data["Mileage"], car_data["Performance"]])
+
             st.write(f"🚗 **{car_data['Make']} {car_data['Model']}** - ${real_price}")
             st.write(f"📏 Mileage: {real_mileage} km | 🔥 Performance: {real_performance} HP")
             st.write(f"💡 Category: {real_category} | Gearbox: {real_gearbox} | Fuel Type: {real_fuel_type}")
             st.write(f"📅 First Registration: {real_first_reg}")
             st.write("---")
-
-    
     else:
         st.write("❌ No similar cars found.")
