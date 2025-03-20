@@ -79,6 +79,11 @@ def search_similar_cars(query_vector):
     response = client.search(index=INDEX_NAME, body=query)
     return response["hits"]["hits"]
 
+# Function to reverse numerical scaling
+def reverse_scaling(scaled_values):
+    return scaler.inverse_transform([scaled_values])[0]  # Returns real values
+
+
 # Streamlit UI
 st.title("Car Recommendation System 🚗")
 st.write("Find similar cars using OpenSearch 🔍")
@@ -96,12 +101,20 @@ if st.button("Find Similar Cars"):
     query_vector = preprocess_input(category, gearbox, fuel_type, first_reg, price, mileage, performance)
     
     results = search_similar_cars(query_vector)
-
+    
     if results:
         for car in results:
             car_data = car["_source"]
-            st.write(f"🚗 **{car_data['Make']} {car_data['Model']}** - ${car_data['Price']}")
-            st.write(f"📏 Mileage: {car_data['Mileage']} km | 🔥 Performance: {car_data['Performance']} HP")
+            scaled_values = [car_data["FirstReg"], car_data["Price"], car_data["Mileage"], car_data["Performance"]]
+            real_values = reverse_scaling(scaled_values)
+            # Assign each value separately
+            real_first_reg = real_values[0]
+            real_price = real_values[1]
+            real_mileage = real_values[2]
+            real_performance = real_values[3]
+            
+            st.write(f"🚗 **{car_data['Make']} {car_data['Model']}** - ${real_price}")
+            st.write(f"📏 Mileage: {real_mileage} km | 🔥 Performance: {real_performance} HP")
             st.write("💡 Category:", car_data["Category"])
             st.write("---")
     else:
