@@ -108,7 +108,7 @@ category = st.selectbox("Category", label_encoders["Category"].classes_)
 first_reg = st.slider("First Registration Year", 2000, 2025, 2015)
 gearbox = st.selectbox("Gearbox", label_encoders["Gearbox"].classes_)
 price = st.number_input("Price ($)", min_value=1000, max_value=100000, value=20000)
-fuel_type = st.selectbox("Fuel Type", label_encoders["FuelType"].classes_)
+fuel_type = st.selectbox("Fuel Type", label_encoders["FuelTyp"].classes_)
 mileage = st.number_input("Mileage (km)", min_value=0, max_value=300000, value=50000)
 performance = st.number_input("Performance (HP)", min_value=50, max_value=1000, value=150)
 
