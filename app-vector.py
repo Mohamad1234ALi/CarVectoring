@@ -24,6 +24,20 @@ def load_scaler(url: str):
         st.error(f"Failed to load scaler: {e}")
         return None
 
+@st.cache_resource
+def load_label_encoders(urls: dict):
+    """Loads LabelEncoders from S3 URLs and returns a dictionary of encoders."""
+    encoders = {}
+    for feature, url in urls.items():
+        try:
+            response = requests.get(url)
+            response.raise_for_status()  # Raise an exception for HTTP errors
+            encoders[feature] = joblib.load(BytesIO(response.content))
+        except Exception as e:
+            st.error(f"Failed to load {feature} encoder: {e}")
+            encoders[feature] = None
+    return encoders
+
 
 # Connect to OpenSearch
 client = OpenSearch(
@@ -38,13 +52,14 @@ client = OpenSearch(
 CATEGORICAL_FEATURES = ["Category", "Gearbox", "FuelType"]
 NUMERICAL_FEATURES = ["FirstReg", "Price", "Mileage", "Performance"]
 
-# Load label encoders (these must match what was used in your index)
-label_encoders = {
-    "Category": LabelEncoder().fit(["OffRoad", "Van", "Limousine", "Estate Car", "Small car", "Sport Car"]),
-    "Gearbox": LabelEncoder().fit(["Manual", "Automatic"]),
-    "FuelType": LabelEncoder().fit(["Petrol", "Diesel", "Electric", "Hybrid"]),
+# URLs for LabelEncoders in S3
+label_encoder_urls = {
+    "Category": "https://car-recommendation-raed.s3.us-east-1.amazonaws.com/label_encoders/Category_encoder.pkl",
+    "Gearbox": "https://car-recommendation-raed.s3.us-east-1.amazonaws.com/label_encoders/Gearbox_encoder.pkl",
+    "FuelTyp": "https://car-recommendation-raed.s3.us-east-1.amazonaws.com/label_encoders/FuelTyp_encoder.pkl",
 }
 
+label_encoders = load_label_encoders(label_encoder_urls)
 
 # Initialize StandardScaler
 scaler_url = "https://car-recommendation-raed.s3.us-east-1.amazonaws.com/modelvectoring/scaler.pkl"
@@ -54,7 +69,7 @@ scaler = load_scaler(scaler_url)
 def preprocess_input(category, gearbox, fuel_type, first_reg, price, mileage, performance):
     category_encoded = label_encoders["Category"].transform([category])[0]
     gearbox_encoded = label_encoders["Gearbox"].transform([gearbox])[0]
-    fuel_type_encoded = label_encoders["FuelType"].transform([fuel_type])[0]
+    fuel_type_encoded = label_encoders["FuelTyp"].transform([fuel_type])[0]
 
     # numerical_values = np.array([[first_reg, price, mileage, performance]])
     # numerical_scaled = scaler.transform(numerical_values)[0] 
