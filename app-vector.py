@@ -94,31 +94,6 @@ def search_similar_cars(query_vector):
     response = client.search(index=INDEX_NAME, body=query)
     return response["hits"]["hits"]
 
-# Function to reverse numerical scaling
-def reverse_scaling(scaled_values):
-    return scaler.inverse_transform([scaled_values])[0]  # Returns real values
-
-
-def reverse_labeling(encoded_value, feature):
-    """
-    Converts an encoded categorical value back to its original label.
-    """
-    try:
-        if feature not in label_encoders:
-            print(f"🚨 Feature '{feature}' not found in label_encoders!")
-            return None
-        
-        le = label_encoders[feature]  # Get the correct LabelEncoder
-
-        if encoded_value not in range(len(le.classes_)):  # Check if value exists
-            print(f"🚨 Encoded value '{encoded_value}' not found in {feature} classes!")
-            return None
-
-        return le.inverse_transform([encoded_value])[0]
-    
-    except Exception as e:
-        print(f"🔥 Error in reverse_labeling for {feature}: {e}")
-        return None
 
 # Streamlit UI
 st.title("Car Recommendation System 🚗")
@@ -141,23 +116,21 @@ if st.button("Find Similar Cars"):
     if results:
         for car in results:
             car_data = car["_source"]
-            scaled_values = [car_data["FirstReg"], car_data["Price"], car_data["Mileage"], car_data["Performance"]]
-            real_values = reverse_scaling(scaled_values)
-            # Assign each value separately
-            real_first_reg = real_values[0]
-            real_price = real_values[1]
-            real_mileage = real_values[2]
-            real_performance = real_values[3]
-
-            real_category = reverse_labeling(car_data["Category"], "Category")
-            real_gearbox = reverse_labeling(car_data["Gearbox"], "Gearbox")
-            real_fuel_type = reverse_labeling(car_data["FuelType"], "FuelTyp")
+            
+            real_category = car_data["Category"]
+            real_gearbox = car_data["Gearbox"]
+            real_fuel_type = car_data["FuelType"]
+            real_first_reg = car_data["FirstReg"]
+            real_price = car_data["Price"]
+            real_mileage = car_data["Mileage"]
+            real_performance = car_data["Performance"]
 
 
             
             st.write(f"🚗 **{car_data['Make']} {car_data['Model']}** - ${real_price}")
             st.write(f"📏 Mileage: {real_mileage} km | 🔥 Performance: {real_performance} HP")
             st.write(f"💡 Category: {real_category} | Gearbox: {real_gearbox} | Fuel Type: {real_fuel_type}")
+            st.write(f"📅 First Registration: {real_first_reg}")
             st.write("---")
     else:
         st.write("❌ No similar cars found.")
