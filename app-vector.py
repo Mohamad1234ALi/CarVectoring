@@ -102,19 +102,23 @@ def reverse_scaling(scaled_values):
 def reverse_labeling(encoded_value, feature):
     """
     Converts an encoded categorical value back to its original label.
-    
-    Parameters:
-        encoded_value (int): The numerical value representing a category.
-        feature (str): The feature name (e.g., "Category", "Gearbox", "FuelTyp").
-    
-    Returns:
-        str: The original category label.
     """
     try:
-        return label_encoders[feature].inverse_transform([encoded_value])[0]
+        if feature not in label_encoders:
+            print(f"🚨 Feature '{feature}' not found in label_encoders!")
+            return None
+        
+        le = label_encoders[feature]  # Get the correct LabelEncoder
+
+        if encoded_value not in range(len(le.classes_)):  # Check if value exists
+            print(f"🚨 Encoded value '{encoded_value}' not found in {feature} classes!")
+            return None
+
+        return le.inverse_transform([encoded_value])[0]
+    
     except Exception as e:
-        print(f"Error in reverse_labeling for {feature}: {e}")
-        return None  # Return None if decoding fails
+        print(f"🔥 Error in reverse_labeling for {feature}: {e}")
+        return None
 
 # Streamlit UI
 st.title("Car Recommendation System 🚗")
