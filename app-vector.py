@@ -99,6 +99,23 @@ def reverse_scaling(scaled_values):
     return scaler.inverse_transform([scaled_values])[0]  # Returns real values
 
 
+def reverse_labeling(encoded_value, feature):
+    """
+    Converts an encoded categorical value back to its original label.
+    
+    Parameters:
+        encoded_value (int): The numerical value representing a category.
+        feature (str): The feature name (e.g., "Category", "Gearbox", "FuelTyp").
+    
+    Returns:
+        str: The original category label.
+    """
+    try:
+        return label_encoders[feature].inverse_transform([encoded_value])[0]
+    except Exception as e:
+        print(f"Error in reverse_labeling for {feature}: {e}")
+        return None  # Return None if decoding fails
+
 # Streamlit UI
 st.title("Car Recommendation System 🚗")
 st.write("Find similar cars using OpenSearch 🔍")
@@ -127,10 +144,16 @@ if st.button("Find Similar Cars"):
             real_price = real_values[1]
             real_mileage = real_values[2]
             real_performance = real_values[3]
+
+            real_category = reverse_labeling(car_data["Category"], "Category")
+            real_gearbox = reverse_labeling(car_data["Gearbox"], "Gearbox")
+            real_fuel_type = reverse_labeling(car_data["FuelType"], "FuelTyp")
+
+
             
             st.write(f"🚗 **{car_data['Make']} {car_data['Model']}** - ${real_price}")
             st.write(f"📏 Mileage: {real_mileage} km | 🔥 Performance: {real_performance} HP")
-            st.write("💡 Category:", car_data["Category"])
+            st.write(f"💡 Category: {real_category} | Gearbox: {real_gearbox} | Fuel Type: {real_fuel_type}")
             st.write("---")
     else:
         st.write("❌ No similar cars found.")
