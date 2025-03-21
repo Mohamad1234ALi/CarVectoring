@@ -8,7 +8,7 @@ import requests
 import joblib
 from io import BytesIO
 # OpenSearch Configuration
-OPENSEARCH_HOST = "https://search-moesystemcar-dnrec2g6qpqy5s5qtlujs7mqly.us-east-1.es.amazonaws.com"
+OPENSEARCH_HOST = "https://search-moecarsystem-3t7t2uxwdebide2md7kxull7su.us-east-1.es.amazonaws.com"
 INDEX_NAME = "cars_index_new"
 USERNAME = "moeuser"
 PASSWORD = "Mohamad@123"
